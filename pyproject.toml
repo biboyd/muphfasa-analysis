@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "muphfasa-analysis"
+version = "0.1.0"
+description = "Analysis and visualization scripts for muphfasa output"
+requires-python = ">=3.10"
+dependencies = ["numpy", "matplotlib", "pandas", "yt"]
+
+[tool.setuptools]
+py-modules = ["muphfasa_yt"]
+packages = ["tgv_plots"]
