@@ -1,32 +1,33 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import yt
-import unyt
 from sys import argv
+
+from muphfasa_yt import load_mks
 
 
 def _ke(field, data):
     return 0.5 * (data['boxlib', 'vx']*data['boxlib', 'vx'] + 
                   data['boxlib', 'vy']*data['boxlib', 'vy'] + 
-                  data['boxlib', 'vz']*data['boxlib', 'vz']) * unyt.m**2/unyt.s**2
+                  data['boxlib', 'vz']*data['boxlib', 'vz'])
 
 def _vorticity_x(field, data):
-    dvz_dy = data["boxlib", "vz_gradient_y"] * unyt.m / unyt.s
-    dvy_dz = data["boxlib", "vy_gradient_z"] * unyt.m / unyt.s
+    dvz_dy = data["boxlib", "vz_gradient_y"]
+    dvy_dz = data["boxlib", "vy_gradient_z"]
     vort = dvz_dy - dvy_dz
 
     return vort
 
 def _vorticity_y(field, data):
-    dvx_dz = data["boxlib", "vx_gradient_z"] * unyt.m / unyt.s
-    dvz_dx = data["boxlib", "vz_gradient_x"] * unyt.m / unyt.s
+    dvx_dz = data["boxlib", "vx_gradient_z"]
+    dvz_dx = data["boxlib", "vz_gradient_x"]
     vort = dvx_dz - dvz_dx
 
     return vort
 
 def _vorticity_z(field, data):
-    dvy_dx = data["boxlib", "vy_gradient_x"] * unyt.m / unyt.s
-    dvx_dy = data["boxlib", "vx_gradient_y"] * unyt.m / unyt.s
+    dvy_dx = data["boxlib", "vy_gradient_x"]
+    dvx_dy = data["boxlib", "vx_gradient_y"]
     vort = dvy_dx - dvx_dy
 
     return vort
@@ -42,17 +43,17 @@ def _enstrophy(field, data):
     return 0.5 * data["boxlib", "vorticity"]**2
 
 def _grad_squared_vel(field, data):
-    du_dx = data["boxlib", "vx_gradient_x"] * unyt.m / unyt.s
-    du_dy = data["boxlib", "vx_gradient_y"] * unyt.m / unyt.s
-    du_dz = data["boxlib", "vx_gradient_z"] * unyt.m / unyt.s
+    du_dx = data["boxlib", "vx_gradient_x"]
+    du_dy = data["boxlib", "vx_gradient_y"]
+    du_dz = data["boxlib", "vx_gradient_z"]
 
-    dv_dx = data["boxlib", "vy_gradient_x"] * unyt.m / unyt.s
-    dv_dy = data["boxlib", "vy_gradient_y"] * unyt.m / unyt.s
-    dv_dz = data["boxlib", "vy_gradient_z"] * unyt.m / unyt.s
+    dv_dx = data["boxlib", "vy_gradient_x"]
+    dv_dy = data["boxlib", "vy_gradient_y"]
+    dv_dz = data["boxlib", "vy_gradient_z"]
 
-    dw_dx = data["boxlib", "vz_gradient_x"] * unyt.m / unyt.s
-    dw_dy = data["boxlib", "vz_gradient_y"] * unyt.m / unyt.s
-    dw_dz = data["boxlib", "vz_gradient_z"] * unyt.m / unyt.s
+    dw_dx = data["boxlib", "vz_gradient_x"]
+    dw_dy = data["boxlib", "vz_gradient_y"]
+    dw_dz = data["boxlib", "vz_gradient_z"]
 
     g2 = du_dx**2 + du_dy**2 + du_dz**2 + \
          dv_dx**2 + dv_dy**2 + dv_dz**2 + \
@@ -95,16 +96,17 @@ def plot_vorticity(ds, axis='z', bounds=None):
     if bounds is not None:
         s.set_zlim('all', bounds[0], bounds[1])
 
-    s.annotate_time()
+    s.annotate_timestamp()
     return s
 
 if __name__ == "__main__":
     curr_file = argv[1]
 
+    bounds = None
     if len(argv) > 2:
         bounds = [float(argv[2]), float(argv[3])]
 
-    ds = yt.load(curr_file)
+    ds = load_mks(curr_file)
     add_new_fields(ds)
 
     for axis in ('x', 'y', 'z'):

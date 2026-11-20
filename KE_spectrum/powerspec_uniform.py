@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sys import argv
 
+from muphfasa_yt import load_mks
+
 def doit(ds):
 
     # a FFT operates on uniformly gridded data.  We'll use the yt
@@ -31,7 +33,7 @@ def doit(ds):
             np.save(f"kk_{vel[1]}.npy", Kk)
 
     # wavenumbers
-    L = (right_edge - left_edge).d
+    L = (right_edge - left_edge).to("m").d
 
     kx = np.fft.rfftfreq(nx) * nx / L[0]
     ky = np.fft.rfftfreq(ny) * ny / L[1]
@@ -66,8 +68,8 @@ def doit(ds):
     plt.loglog(k, E_spectrum)
     plt.loglog(k, Emax * (k / kmax) ** (-5.0 / 3.0), ls=":", color="0.5")
 
-    plt.xlabel(r"$k (\mathrm{cm^{-1}})$")
-    plt.ylabel(r"$\mathrm{E}(k)\mathrm{dk}$")
+    plt.xlabel(r"$k\ (\mathrm{m^{-1}})$")
+    plt.ylabel(r"$\mathrm{E}(k)\mathrm{dk}\ (\mathrm{m^2/s^2})$")
 
     plt.savefig(f"{ds.basename}_spectrum.png")
     return E_spectrum, k
@@ -77,7 +79,7 @@ def fft_comp(ds, iu, level, low, delta):
 
     cube = ds.covering_grid(level, left_edge=low, dims=delta, fields=[iu])
 
-    u = cube[iu].d
+    u = cube[iu].to("m/s").d
 
     nx, ny, nz = u.shape
 
@@ -96,7 +98,7 @@ def fft_comp(ds, iu, level, low, delta):
 if __name__ == '__main__':
     dsname = argv[1]
 
-    ds = yt.load(dsname)
+    ds = load_mks(dsname)
 
     E_arr, k_arr = doit(ds)
 
